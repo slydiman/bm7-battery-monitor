@@ -47,7 +47,7 @@ sensor:
   - platform: template
     name: "Temperature"
     id: temperature
-    unit_of_measurement: "°C"
+    unit_of_measurement: "Â°C"
     icon: "mdi:thermometer"
     accuracy_decimals: 0
 
@@ -102,6 +102,29 @@ sensor:
       
       return 0;
 
+text_sensor:
+  - platform: template
+    name: "Battery Status"
+    id: battery_status
+    icon: "mdi:battery"
+    update_interval: 10s
+    lambda: |-
+      if (isnan(id(voltage).state) || id(voltage).state == 0.0) {
+        return std::string("Unknown");
+      }
+      float v = id(voltage).state;
+      if (v > 14.4) {
+        return std::string("Over Voltage");
+      } else if (v >= 13.8) {
+        return std::string("Charging");
+      } else if (v >= 12.0) {
+        return std::string("Idle");
+      } else if (v >= 10.5) {
+        return std::string("Discharging");
+      } else {
+        return std::string("Under Voltage");
+      }
+
 interval:
   - interval: 1min # How often you want to poll the Ancel BM300 Pro
     then:
@@ -120,3 +143,4 @@ interval:
                 service_uuid: 0000fff0-0000-1000-8000-00805f9b34fb
                 characteristic_uuid: 0000fff3-0000-1000-8000-00805f9b34fb
                 value: [0x58, 0x6d, 0x7b, 0x23, 0x77, 0xc6, 0x92, 0x4d, 0xcd, 0x75, 0x0a, 0xcb, 0x29, 0xf5, 0xbf, 0x8d] # Encrypted "d1550700000000000000000000000000" 
+
